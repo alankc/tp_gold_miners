@@ -1,17 +1,21 @@
 /*
+    gold_miners_b
+    ---------------------------
 
-    JaCaMo Project File
+    JaCaMo Application File
 
     This file defines the initial state of the MAS (initial agents, environment, organisation, ....)
 
-    --
-    Based on initially implementation developed by Rafael Bordini, Jomi Hubner and Maicon Zatelli,
-    and then adapted for courses by Joao Leite (http://centria.di.fct.unl.pt/~jleite/wesaac14/)
+    (see jacamo/doc/jcm.html for more information about what can be defined in this file)
 
+    JaCaMo 1.0
+    março 14, 2022 - 13:57:40
 */
 
-mas gold_miners_a {
-    agent leader
+mas gold_miners_b {
+    agent leader {
+        focus: mining.qdf
+    }
     agent miner1 : miner.asl  {
         focus: mining.m1view
     }
@@ -33,6 +37,7 @@ mas gold_miners_a {
         artifact m2view: mining.MiningPlanet(6,1)
         artifact m3view: mining.MiningPlanet(6,2)
         artifact m4view: mining.MiningPlanet(6,3)
+        artifact qdf: 	mining.QuadrantDefiner(6)
     }
 
     class-path: lib                      // java class path
