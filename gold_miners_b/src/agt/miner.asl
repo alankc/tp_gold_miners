@@ -157,6 +157,7 @@ score(0).
 	<- 	.drop_desire(handle(gold(PX, PY)));
 		.print("Dropping ", gold(PX, PY), "to perform ", gold(X,Y));
 		!init_handle(gold(X,Y)).	
+		
 
 /* The next plans encode how to handle a piece of gold.
  * The first one drops the desire to be near some location,
@@ -216,7 +217,6 @@ score(0).
 
 +!ensure(drop, _) : carrying_gold & depot(_,DX,DY) & pos(DX,DY)
   <- drop.
-
 
 
 /* The next plans encode how the agent can choose the next gold piece
