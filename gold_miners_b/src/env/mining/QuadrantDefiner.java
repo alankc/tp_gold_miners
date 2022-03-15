@@ -15,10 +15,10 @@ public class QuadrantDefiner extends Artifact {
 	WorldModel model = null;
 	
 	//Agent, its location
-	Map<String, Location> nonAllocatedMiners;
+	private Map<String, Location> nonAllocatedMiners;
 	
 	//Agent, <StartQuatrand, EndQuadrant>
-	Map<String, Pair<Location, Location>> quadrants;
+	private Map<String, Pair<Location, Location>> quadrants;
 	
 	void init(int worldModel) {
 		initWorld(worldModel);

@@ -19,17 +19,6 @@ score(0).
 /* this agent program doesn't have any rules */
 
 
-/* plans for sending the initial position to leader */
-/* Adapted from Jason Example */
-+gsize(S,_,_) : true // S is the simulation Id
-  <- !send_init_pos(S).
-+!send_init_pos(S) : pos(X,Y)
-  <- .send(leader,tell,init_pos(S,X,Y)).
-+!send_init_pos(S) : not pos(_,_) // if I do not know my position yet
-  <- .wait("+pos(X,Y)", 500);     // wait for it and try again
-     !!send_init_pos(S).
-
-
 /* When free, agents wonder around. This is encoded with a plan that executes
  * when agents become free (which happens initially because of the belief "free"
  * above, but can also happen during the execution of the agent (as we will see below).
@@ -40,11 +29,9 @@ score(0).
  * its belief base, which will trigger the plan to go to a random location again.
  */
 
-+free : quadrant(SX, EX, SY, EY) & jia.randomRange(RX,SX,EX) & jia.randomRange(RY,SY,EY)
++free : gsize(_,W,H) & jia.random(RX,W-1) & jia.random(RY,H-1)
    <-  .print("I am going to go near (",RX,",", RY,")");
-       !go_near(RX,RY);
-       !choose_gold;
-       .
+       !go_near(RX,RY).
 +free  // gsize is unknown yet
    <- .wait(100); -+free.
 
@@ -108,8 +95,6 @@ score(0).
 +!next_step(X,Y) : pos(AgX,AgY) // I already know my position
    <- jia.get_direction(AgX, AgY, X, Y, D);
       -+last_dir(D);
-      jia.randomRange(RX,0,50);
-      .wait(RX); //
       D.
 +!next_step(X,Y) : not pos(_,_) // I still do not know my position
    <- !next_step(X,Y).
@@ -139,25 +124,19 @@ score(0).
  * Then it adds the belief that there is gold in position X,Y, and
  * prints a message. Finally, it calls a plan to handle that piece of gold.
  */
- 
- +cell(X,Y,gold) <- +cell_gold(X,Y,gold).
 
 // perceived golds are included as self beliefs (to not be removed once not seen anymore)
++cell(X,Y,gold) <- +gold(X,Y).
+
 @pgold[atomic]           // atomic: so as not to handle another event until handle gold is initialised
-+cell_gold(X,Y,gold)
++gold(X,Y)
   :  not carrying_gold & free
   <- -free;
      .print("Gold perceived: ",gold(X,Y));
-     //removed gold from the general list. If it is there...
-     lookupArtifact(gldMp,IdGM);
-	 focus(IdGM);
-	 removeGold(X,Y)[artifact_id(IdGM)];
-     +gold(X,Y);
      !init_handle(gold(X,Y)).
      
-/*Exercício I: agent is going to pick-up gold and detects another */
-@pgold_exer[atomic] 
-+cell_gold(X,Y,gold)
+@pgold_exer[atomic] /*Exercício I: agent is going to pick-up gold and detects another */
++gold(X,Y)
 	: 	not carrying_gold & not free &
 		.desire(handle(gold(PX,PY))) & //previous gold's X and Y
 		pos(AgX, AgY) &
@@ -166,21 +145,7 @@ score(0).
 		NGoldDist < PGoldDist
 	<- 	.drop_desire(handle(gold(PX, PY)));
 		.print("Dropping ", gold(PX, PY), "to perform ", gold(X,Y));
-		//removed gold from the general list. If it is there...
-		lookupArtifact(gldMp,IdGM);
-	 	focus(IdGM);
-	 	removeGold(X,Y)[artifact_id(IdGM)];
-		addGold(PX,PY)[artifact_id(IdGM)];
-		+gold(X,Y);
-		-gold(PX, PY);
-		!init_handle(gold(X,Y)).
-
-@pgold_gold[atomic]		
-+cell_gold(X,Y,gold) 
-	<-  lookupArtifact(gldMp,ArtId);
-		addGold(X,Y)[artifact_id(ArtId)];
-		.		
-		
+		!init_handle(gold(X,Y)).	
 
 /* The next plans encode how to handle a piece of gold.
  * The first one drops the desire to be near some location,
@@ -211,7 +176,6 @@ score(0).
   <- .print("Handling ",gold(X,Y)," now.");
      !pos(X,Y);
      !ensure(pick,gold(X,Y));
-     .broadcast(tell, picked(gold(X,Y)));
      ?depot(_,DX,DY); /* Exer D */
      !pos(DX,DY); /* Exer D */
      !ensure(drop, 0);
@@ -230,15 +194,6 @@ score(0).
   <- .print("failed to handle ",G,", it isn't in the BB anyway");
      !!choose_gold.
 
-//Used from jason example
-@ppgd[atomic]
-+picked(G)[source(A)]
-  :  .desire(handle(G)) | .desire(init_handle(G))
-  <- .print(A," has taken ",G," that I am pursuing! Dropping my intention.");
-     .abolish(G);
-     .drop_desire(handle(G));
-     !!choose_gold.
-
 /* The next plans deal with picking up and dropping gold. */
 
 +!ensure(pick,_) : pos(X,Y) & gold(X,Y)
@@ -252,11 +207,11 @@ score(0).
   <- drop.
 
 
+
 /* The next plans encode how the agent can choose the next gold piece
  * to pursue (the closest one to its current position) or,
  * if there is no known gold location, makes the agent believe it is free.
  */
- /* 
 +!choose_gold
   :  not gold(_,_)
   <- -+free.
@@ -272,31 +227,8 @@ score(0).
      .min(LD,d(_,NewG));
      .print("Next gold is ",NewG);
      !!handle(NewG).
-*/
-     
-+!choose_gold
-	:	pos(AgX, AgY)
-	<-	.my_name(Ag);
-		//focusing in the Gold map
-		lookupArtifact(gldMp,IdGM);
-		focus(IdGM);
-		getGold(Ag, AgX, AgY)[artifact_id(IdGM)];
-		.     
-//+!choose_gold <- .wait(10); !choose_gold.
-
 -!choose_gold <- -+free.
 
-+best_gold(Ag, GX, GY)[artifact_id(IdGM)] 
-	: .my_name(Ag) & GX \== none & GY \== none 
-	<-	+gold(GX, GY);
-		!init_handle(gold(GX, GY)).
-	
-+best_gold(Ag, GX, GY)[artifact_id(IdGM)] 
-	: .my_name(Ag) & GX == none & GY == none 
-	<-	-+free;
-		.	
-
-/*
 +!calc_gold_distance([],[]).
 +!calc_gold_distance([gold(GX,GY)|R],[d(D,gold(GX,GY))|RD])
   :  pos(IX,IY)
@@ -305,7 +237,6 @@ score(0).
 +!calc_gold_distance([_|R],RD)
   <- !calc_gold_distance(R,RD).
 
-*/
 
 /* end of a simulation */
 

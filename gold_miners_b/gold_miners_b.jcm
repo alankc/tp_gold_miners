@@ -37,7 +37,8 @@ mas gold_miners_b {
         artifact m2view: mining.MiningPlanet(6,1)
         artifact m3view: mining.MiningPlanet(6,2)
         artifact m4view: mining.MiningPlanet(6,3)
-        artifact qdf: 	mining.QuadrantDefiner(6)
+        artifact qdf: 	 mining.QuadrantDefiner(6)
+        artifact gldMp:  mining.GoldMap()
     }
 
     class-path: lib                      // java class path

@@ -34,29 +34,41 @@ winning(none,0). /* Exer F*/
 
 /* plans for receiving the initial position from miners */
 /* Adapted from Jason Example */
-   
+
 +init_pos(S,X,Y)[source(A)]
   :	 .count(init_pos(S,_,_),4) // if all miners have sent their position
   <- .print("* InitPos ",A," is ",X,"x",Y);
-     addMiner(A, X, Y);
+     lookupArtifact(qdf,ArtId);
+     addMiner(A, X, Y)[artifact_id(ArtId)];
+     .wait(100);
      !quadrant;
-     .     
-     
+     . 
+         
 +init_pos(S,X,Y)[source(A)]
 	<-	.print("* InitPos ",A," is ",X,"x",Y);
-     	addMiner(A, X, Y);
-     	.     
-
+		lookupArtifact(qdf,ArtId);
+     	addMiner(A, X, Y)[artifact_id(ArtId)];
+     	.    
+     	 
 +!quadrant 
-	<- 	computeQuadrants;
-		updatePropQuadrant(miner1);
-		updatePropQuadrant(miner2);
-		updatePropQuadrant(miner3);
-		updatePropQuadrant(miner4);
+	<- 	lookupArtifact(qdf,IdQdf);
+		computeQuadrants[artifact_id(IdQdf)];
+		updatePropQuadrant(miner1)[artifact_id(IdQdf)];
+		updatePropQuadrant(miner2)[artifact_id(IdQdf)];
+		updatePropQuadrant(miner3)[artifact_id(IdQdf)];
+		updatePropQuadrant(miner4)[artifact_id(IdQdf)];
+		
+		lookupArtifact(gldMp,IgGM);
+		setQuadrantExclusive(true)[artifact_id(IgGM)];
 		.      
 
 /* plans for send the quadrant to miners */
-+quadrant(Ag, SX, EX, SY, EY) : Ag \== none <- .send(Ag, tell, quadrant(SX, EX, SY, EY)).
++quadrant(Ag, SX, EX, SY, EY) 
+	:	Ag \== none 
+	<-	.send(Ag, tell, quadrant(SX, EX, SY, EY));
+		lookupArtifact(gldMp,IgGM);
+		addMiner(Ag, SX, EX, SY, EY)[artifact_id(IgGM)];
+		.
 	
 	
 	
