@@ -42,6 +42,9 @@ public class GoldMap extends Artifact {
 			if (golds.get(i).x == x && golds.get(i).y == y)
 				return;
 		}
+		System.out.println("################################");
+		System.out.println("ADD GOLD IN: (" + x + "," + y + ")");
+		System.out.println("################################");
 		golds.add(new Location(x, y));
 	}
 
@@ -55,6 +58,10 @@ public class GoldMap extends Artifact {
 		}
 		if (toRemove > -1)
 			golds.remove(toRemove);
+		
+		System.out.println("################################");
+		System.out.println("REMOVE GOLD IN: (" + x + "," + y + ")");
+		System.out.println("################################");
 	}
 
 	@OPERATION

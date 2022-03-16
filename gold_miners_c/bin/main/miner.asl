@@ -41,8 +41,6 @@ score(0).
 	: gsize(S,_,_) & pos(X,Y)
 	<- 	.send(leader,tell,init_pos(S,X,Y));
 		.wait(50). //waiting leader receive information
-	
-+!run_miner <- +free.
 
 /* When free, agents wonder around. This is encoded with a plan that executes
  * when agents become free (which happens initially because of the belief "free"
@@ -53,17 +51,14 @@ score(0).
  * agent is near the desired position, if free, it deletes and adds the atom free to
  * its belief base, which will trigger the plan to go to a random location again.
  */
- 
-+free
-	: .desire(run_miner)
-   <- .succeed_goal(run_miner).   
+
++free[source(leader)] <- .print(comeceiiiiiii); -free[source(leader)]; -+free.
 
 +free : quadrant(SX, EX, SY, EY) & jia.randomRange(RX,SX,EX) & jia.randomRange(RY,SY,EY)
    <-  .print("I am going to go near (",RX,",", RY,")");
        !go_near(RX,RY);
        !choose_gold;
        .
-          
 +free  // gsize is unknown yet
    <- .wait(100); -+free.
 
@@ -168,10 +163,7 @@ score(0).
   <- -free;
      .print("Gold perceived: ",gold(X,Y));
      //removed gold from the general list. If it is there...
-     joinWorkspace(mining, WspId);
-     lookupArtifact(gldMp,IdGM);
-     focus(IdGM)[wid(WspId)];
-	 removeGold(X,Y)[artifact_id(IdGM)];
+	 gd::removeGold(X,Y);
      +gold(X,Y);
      !init_handle(gold(X,Y)).
      
@@ -187,21 +179,15 @@ score(0).
 	<- 	.drop_desire(handle(gold(PX, PY)));
 		.print("Dropping ", gold(PX, PY), "to perform ", gold(X,Y));
 		//removed gold from the general list. If it is there...
-		joinWorkspace(mining, WspId);
-     	lookupArtifact(gldMp,IdGM);
-     	focus(IdGM)[wid(WspId)];
-	 	removeGold(X,Y)[artifact_id(IdGM)];
-		addGold(PX,PY)[artifact_id(IdGM)];
+	 	gd::removeGold(X,Y);
+		gd::addGold(PX,PY);
 		+gold(X,Y);
 		-gold(PX, PY);
 		!init_handle(gold(X,Y)).
 
 @pgold_gold[atomic]		
 +cell_gold(X,Y,gold) 
-	<-  joinWorkspace(mining, WspId);
-     	lookupArtifact(gldMp,IdGM);
-     	focus(IdGM)[wid(WspId)];
-		addGold(X,Y)[artifact_id(ArtId)];
+	<-  gd::addGold(X,Y);
 		.		
 		
 
@@ -301,24 +287,22 @@ score(0).
 	:	pos(AgX, AgY)
 	<-	.my_name(Ag);
 		//focusing in the Gold map
-		joinWorkspace(mining, WspId);
-     	lookupArtifact(gldMp,IdGM);
-     	focus(IdGM)[wid(WspId)];
-		getGold(Ag, AgX, AgY)[artifact_id(IdGM)];
+		gd::getGold(Ag, AgX, AgY);
 		.     
 //+!choose_gold <- .wait(10); !choose_gold.
 
 -!choose_gold <- -+free.
 
-+best_gold(Ag, GX, GY)[artifact_id(IdGM)] 
-	: .my_name(Ag) & GX \== none & GY \== none 
++gd::best_gold(Ag, GX, GY)[artifact_id(IdGM)] 
+	:	.my_name(Ag) & GX \== none & GY \== none 
 	<-	+gold(GX, GY);
-		!init_handle(gold(GX, GY)).
+		!init_handle(gold(GX, GY))
+		.print("@@@@@@>>> Best gold 1").
 	
-+best_gold(Ag, GX, GY)[artifact_id(IdGM)] 
-	: .my_name(Ag) & GX == none & GY == none 
++gd::best_gold(Ag, GX, GY)[artifact_id(IdGM)] 
+	:	.my_name(Ag) & GX == none & GY == none 
 	<-	-+free;
-		.	
+		.print("@@@@@@>>> Best gold 2").	
 
 /*
 +!calc_gold_distance([],[]).

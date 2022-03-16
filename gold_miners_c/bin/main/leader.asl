@@ -39,13 +39,15 @@ winning(none,0). /* Exer F*/
 
 +init_pos(S,X,Y)[source(A)]
 	<-	.print("* InitPos ",A," is ",X,"x",Y);
-		
-		joinWorkspace(mining, WspId);
-		lookupArtifact(qdf,ArtId);
-		focus(ArtId)[wid(WspId)];
-		
-     	addMiner(A, X, Y)[artifact_id(ArtId)];
+		qd::addMiner(A, X, Y);
      	.
+     	
++qd::quadrant(Ag, SX, EX, SY, EY) 
+	:	Ag \== none 
+	<-	.send(Ag, tell, quadrant(SX, EX, SY, EY));
+		.print(quadrant(Ag, SX, EX, SY, EY));
+		gd::addMiner(Ag, SX, EX, SY, EY);
+		.     	
 
 +!set_artifacts <- !wait_miners.
 	
@@ -57,30 +59,19 @@ winning(none,0). /* Exer F*/
 +!wait_miners <- !quadrants.		
    	
 +!quadrants
-	<- 	joinWorkspace(mining, WspId);
-		lookupArtifact(qdf,IdQdf);
-		focus(IdQdf)[wid(WspId)];
-	
-		computeQuadrants[artifact_id(IdQdf)];
+	<- 	//Compute quadrants
+		qd::computeQuadrants[artifact_id(IdQdf)];
+		//Set Quadrants
+		qd::updatePropQuadrant(miner1)[artifact_id(IdQdf)];
+		qd::updatePropQuadrant(miner2)[artifact_id(IdQdf)];
+		qd::updatePropQuadrant(miner3)[artifact_id(IdQdf)];
+		qd::updatePropQuadrant(miner4)[artifact_id(IdQdf)];
+		//Set strategy in gold
+		gd::setQuadrantExclusive(true)[artifact_id(IgGM)];
+		.     
 		
-		updatePropQuadrant(miner1)[artifact_id(IdQdf)];
-		updatePropQuadrant(miner2)[artifact_id(IdQdf)];
-		updatePropQuadrant(miner3)[artifact_id(IdQdf)];
-		updatePropQuadrant(miner4)[artifact_id(IdQdf)];
 		
-		lookupArtifact(gldMp,IgGM);
-		focus(IgGM)[wid(WspId)];
-		setQuadrantExclusive(true)[artifact_id(IgGM)];
-		.     	    	    
-
-/* plans for send the quadrant to miners */
-+quadrant(Ag, SX, EX, SY, EY) 
-	:	Ag \== none 
-	<-	.send(Ag, tell, quadrant(SX, EX, SY, EY));
-		lookupArtifact(gldMp,IgGM);
-		addMiner(Ag, SX, EX, SY, EY)[artifact_id(IgGM)];
-		.
-	
++!run_miner <- 	.broadcast(tell, free).
 	
 	
 	
