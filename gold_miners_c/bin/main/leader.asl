@@ -66,7 +66,7 @@ winning(none,0). /* Exer F*/
 		qd::updatePropQuadrant(miner3)[artifact_id(IdQdf)];
 		qd::updatePropQuadrant(miner4)[artifact_id(IdQdf)];
 		//Set strategy in gold
-		gd::setQuadrantExclusive(true)[artifact_id(IgGM)];
+		gd::setQuadrantExclusive(false)[artifact_id(IgGM)];
 		.     
 		
 		
