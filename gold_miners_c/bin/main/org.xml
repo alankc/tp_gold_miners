@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?xml-stylesheet href="http://moise.sourceforge.net/xml/os.xsl" type="text/xsl" ?>
+
+<organisational-specification
+    id="gold_miners_a"
+    os-version="0.8"
+
+    xmlns='http://moise.sourceforge.net/os'
+    xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+    xsi:schemaLocation='http://moise.sourceforge.net/os
+                        http://moise.sourceforge.net/xml/os.xsd' >
+
+<structural-specification>
+	
+	<role-definitions>
+		<role id="leader" />
+		<role id="miner" />
+	</role-definitions>
+	
+	<group-specification id="mining_group">
+		<roles>
+			<role id="leader" min="1" max="1"/>
+			<role id="miner" min="4" max="4"/>
+		</roles>
+	</group-specification>
+	
+</structural-specification>
+
+<functional-specification>
+	<scheme id="mining_scheme">
+        <goal id="setup">
+            <plan operator="sequence">
+                <goal id="send_start_position"/>
+                <goal id="set_artifacts"/>
+                <goal id="run_miner"/>
+            </plan>
+        </goal>
+
+        <mission id="mLeader" min="1" max="1">
+        	<goal id="set_artifacts"/>
+        </mission>
+        
+        <mission id="mMiner" min="4" max="4">
+            <goal id="send_start_position"/>
+            <goal id="run_miner"/>
+        </mission>
+    </scheme>
+</functional-specification>
+
+<normative-specification>
+    <norm id="nLeader" type="obligation" role="leader" mission="mLeader"/>
+    <norm id="nMiner" type="obligation" role="miner" mission="mMiner"/>
+</normative-specification>
+
+</organisational-specification>
