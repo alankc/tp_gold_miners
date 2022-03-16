@@ -41,6 +41,11 @@ score(0).
 	: gsize(S,_,_) & pos(X,Y)
 	<- 	.send(leader,tell,init_pos(S,X,Y));
 		.wait(50). //waiting leader receive information
+		
++qd::quadrant(Ag, SX, EX, SY, EY) 
+	:	.my_name(Ag)
+	<-	+quadrant(SX, EX, SY, EY);
+		.  		
 
 /* When free, agents wonder around. This is encoded with a plan that executes
  * when agents become free (which happens initially because of the belief "free"
@@ -297,12 +302,12 @@ score(0).
 	:	.my_name(Ag) & GX \== none & GY \== none 
 	<-	+gold(GX, GY);
 		!init_handle(gold(GX, GY))
-		.print("@@@@@@>>> Best gold 1").
+		.
 	
 +gd::best_gold(Ag, GX, GY)[artifact_id(IdGM)] 
 	:	.my_name(Ag) & GX == none & GY == none 
 	<-	-+free;
-		.print("@@@@@@>>> Best gold 2").	
+		.	
 
 /*
 +!calc_gold_distance([],[]).

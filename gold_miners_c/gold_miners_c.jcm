@@ -54,6 +54,10 @@ mas gold_miners_c {
     workspace quadrant {
     	 artifact qdf: 	mining.QuadrantDefiner(6) {
     		focused-by: qd::leader
+    					qd::miner1
+    					qd::miner2
+    					qd::miner3
+    					qd::miner4
     	}
     }
     

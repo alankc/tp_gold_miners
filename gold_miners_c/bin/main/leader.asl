@@ -44,8 +44,7 @@ winning(none,0). /* Exer F*/
      	
 +qd::quadrant(Ag, SX, EX, SY, EY) 
 	:	Ag \== none 
-	<-	.send(Ag, tell, quadrant(SX, EX, SY, EY));
-		.print(quadrant(Ag, SX, EX, SY, EY));
+	<-	.print(quadrant(Ag, SX, EX, SY, EY));
 		gd::addMiner(Ag, SX, EX, SY, EY);
 		.     	
 
