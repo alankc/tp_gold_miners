@@ -17,7 +17,12 @@ last_dir(null). // the last movement I did
 score(0).
 
 /* rules */
-/* this agent program doesn't have any rules */
+// next line is the bottom of the quadrant
+// if 2 lines bellow is too far
+calc_new_y(AgY,QuadY2,QuadY2) :- AgY+2 > QuadY2.
+
+// otherwise, the next line is 2 lines bellow
+calc_new_y(AgY,_,Y) :- Y = AgY+2.
 
 
 /* plans for sending the initial position to leader */
@@ -46,6 +51,16 @@ score(0).
 	:	.my_name(Ag)
 	<-	+quadrant(SX, EX, SY, EY);
 		.  		
+		
+/*Exercício H */
++winning(Ag,S)[source(leader)] //I am winning
+	: .my_name(Ag) 
+	<- 	-winning(Ag,S);
+		.print("I am winning with ",S," pieces of gold!").
+		
++winning(Ag,S)[source(leader)] //I am not winning
+	: 	true
+	<- 	-winning(Ag,S).			
 
 /* When free, agents wonder around. This is encoded with a plan that executes
  * when agents become free (which happens initially because of the belief "free"
@@ -57,66 +72,60 @@ score(0).
  * its belief base, which will trigger the plan to go to a random location again.
  */
 
-+free[source(leader)] <- .print(comeceiiiiiii); -free[source(leader)]; -+free.
++free[source(leader)] <- -free[source(leader)]; -+free.
+   
+/* plans for wandering in my quadrant when I'm free */
 
-+free : quadrant(SX, EX, SY, EY) & jia.randomRange(RX,SX,EX) & jia.randomRange(RY,SY,EY)
-   <-  .print("I am going to go near (",RX,",", RY,")");
-       !go_near(RX,RY);
-       !choose_gold;
-       .
-+free  // gsize is unknown yet
-   <- .wait(100); -+free.
++free : quadrant(X1,X2,Y1,Y2) <- !prep_around(X1,Y1).
++free : true				  <- .wait(100); -+free.
+   
+// if I am around the upper-left corner, move to upper-right corner
++around(X1,Y1) : quadrant(X1,X2,Y1,Y2) & free
+  <- .print("in Q1 to ",X2,"x",Y1);
+     !prep_around(X2,Y1).
 
-/* When the agent comes to believe it is near the location and it is still free,
- * it updates the atom "free" so that it can trigger the plan to go to a random
- * location again.
- */
-+near(X,Y) : free <- -+free.
+// if I am around the bottom-right corner, move to upper-left corner
++around(X2,Y2) : quadrant(X1,X2,Y1,Y2) & free
+  <- .print("in Q4 to ",X1,"x",Y1);
+     !prep_around(X1,Y1).
 
-/*Exercício H */
-+winning(Ag,S)[source(leader)] //I am winning
-	: .my_name(Ag) 
-	<- 	-winning(Ag,S);
-		.print("I am winning with ",S," pieces of gold!").
-		
-+winning(Ag,S)[source(leader)] //I am not winning
-	: 	true
-	<- 	-winning(Ag,S).		
+// if I am around the right side, move to left side two lines bellow
++around(X2,Y) : quadrant(X1,X2,Y1,Y2) & free
+  <- ?calc_new_y(Y,Y2,YF);
+     .print("in Q2 to ",X1,"x",YF);
+     !prep_around(X1,YF).
 
+// if I am around the left side, move to right side two lines bellow
++around(X1,Y) : quadrant(X1,X2,Y1,Y2) & free
+  <- ?calc_new_y(Y,Y2,YF);
+     .print("in Q3 to ", X2, "x", YF);
+     !prep_around(X2,YF).
 
+// last "around" was none of the above, go back to my quadrant
++around(X,Y) : quadrant(X1,X2,Y1,Y2) & free & Y <= Y2 & Y >= Y1
+  <- .print("in no Q, going to X1");
+     !prep_around(X1,Y).
++around(X,Y) : quadrant(X1,X2,Y1,Y2) & free & X <= X2 & X >= X1
+  <- .print("in no Q, going to Y1");
+     !prep_around(X,Y1).
 
-/* The following plans encode how an agent should go to near a location X,Y.
- * Since the location might not be reachable, the plans succeed
- * if the agent is near the location, given by the internal action jia.neighbour,
- * or if the last action was skip, which happens when the destination is not
- * reachable, given by the plan next_step as the result of the call to the
- * internal action jia.get_direction.
- * These plans are only used when exploring the grid, since reaching the
- * exact location is not really important.
- */
++around(X,Y) : quadrant(X1,X2,Y1,Y2)
+  <- .print("It should never happen!!!!!! - go home");
+     !prep_around(X1,Y1).
 
-+!go_near(X,Y) : free
-  <- -near(_,_);
-     -last_dir(_);
-     !near(X,Y).
++!prep_around(X,Y) : free
+  <- -around(_,_); -last_dir(_); !around(X,Y).
 
-
-// I am near to some location if I am near it
-+!near(X,Y) : (pos(AgX,AgY) & jia.neighbour(AgX,AgY,X,Y))
-   <- .print("I am at ", "(",AgX,",", AgY,")", " which is near (",X,",", Y,")");
-      +near(X,Y).
-
-// I am near to some location if the last action was skip
-// (meaning that there are no paths to there)
-+!near(X,Y) : pos(AgX,AgY) & last_dir(skip)
-   <- .print("I am at ", "(",AgX,",", AgY,")", " and I can't get to' (",X,",", Y,")");
-      +near(X,Y).
-
-+!near(X,Y) : not near(X,Y)
++!around(X,Y)
+   :  // I am around to some location if I am near it or
+      // the last action was skip (meaning that there are no paths to there)
+      (pos(AgX,AgY) & jia.neighbour(AgX,AgY,X,Y)) | last_dir(skip)
+   <- +around(X,Y).
++!around(X,Y) : not around(X,Y)
    <- !next_step(X,Y);
-      !near(X,Y).
-+!near(X,Y) : true
-   <- !near(X,Y).
+      !!around(X,Y).
++!around(X,Y) : true
+   <- !!around(X,Y).
 
 
 /* These are the plans to have the agent execute one step in the direction of X,Y.
@@ -147,8 +156,6 @@ score(0).
 +!pos(X,Y) : not pos(X,Y)
    <- !next_step(X,Y);
       !pos(X,Y).
-
-
 
 /* Gold-searching Plans */
 
@@ -210,9 +217,10 @@ score(0).
 
 @pih1[atomic]
 +!init_handle(Gold)
-  :  .desire(near(_,_))
+  :  .desire(around(_,_)) //oldversion .desire(near(_,_))
   <- .print("Dropping near(_,_) desires and intentions to handle ",Gold);
-     .drop_desire(near(_,_));
+     //oldversion .drop_desire(near(_,_));
+     .drop_desire(around(_,_));
      !init_handle(Gold).
 @pih2[atomic]
 +!init_handle(Gold)

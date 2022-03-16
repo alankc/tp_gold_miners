@@ -63,7 +63,7 @@ mas gold_miners_c {
     
     organisation org_miners : org.xml {
     	
-            group miners : mining_group {
+            group miners : 	mining_group {
                 players :	miner1 miner
                 			miner2 miner
                 			miner3 miner
