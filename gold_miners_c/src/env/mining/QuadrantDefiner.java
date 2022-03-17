@@ -76,6 +76,8 @@ public class QuadrantDefiner extends Artifact {
 			end 	= new Location(widthSize / 2 - 1, heightSize / 2 - 1);
 			addAgentToQuadrant(start, end);
 			
+			if (nonAllocatedMiners.size() == 0) //e.g. For the case with 5 miners
+				break;
 			//Quadrant 2
 			// 0 #
 			// 0 0
@@ -83,6 +85,8 @@ public class QuadrantDefiner extends Artifact {
 			end 	= new Location(widthSize - 1, heightSize / 2 - 1);
 			addAgentToQuadrant(start, end);
 			
+			if (nonAllocatedMiners.size() == 0)  //e.g. For the case with 6 miners
+				break;
 			//Quadrant 3
 			// 0 0
 			// # 0
@@ -90,6 +94,8 @@ public class QuadrantDefiner extends Artifact {
 			end 	= new Location(widthSize / 2 - 1, heightSize - 1);
 			addAgentToQuadrant(start, end);
 			
+			if (nonAllocatedMiners.size() == 0)  //e.g. For the case with 7 miners
+				break;
 			//Quadrant 4
 			// 0 0
 			// 0 #
