@@ -44,7 +44,9 @@ calc_new_y(AgY,_,Y) :- Y = AgY+2.
 
 +!send_position
 	: gsize(S,_,_) & pos(X,Y)
-	<- 	.send(leader,tell,init_pos(S,X,Y));
+	<- 	//.send(leader,tell,init_pos(S,X,Y)); from old version
+		.my_name(A);
+		qd::addMiner(A, X, Y);
 		.wait(50). //waiting leader receive information
 		
 +qd::quadrant(Ag, SX, EX, SY, EY) 

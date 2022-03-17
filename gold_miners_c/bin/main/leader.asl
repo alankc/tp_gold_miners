@@ -37,10 +37,10 @@ winning(none,0). /* Exer F*/
 /* plans for receiving the initial position from miners */
 /* Adapted from Jason Example */
 
-+init_pos(S,X,Y)[source(A)]
+/*+init_pos(S,X,Y)[source(A)]
 	<-	.print("* InitPos ",A," is ",X,"x",Y);
 		qd::addMiner(A, X, Y);
-     	.
+     	.*/
      	
 +qd::quadrant(Ag, SX, EX, SY, EY) 
 	:	Ag \== none 
@@ -48,26 +48,17 @@ winning(none,0). /* Exer F*/
 		gd::addMiner(Ag, SX, EX, SY, EY);
 		.     	
 
-+!set_artifacts <- !wait_miners.
-	
-+!wait_miners
-	: not .count(init_pos(S,X,Y), 4) 
-	<- 	.wait(100);
-		!wait_miners.
-
-+!wait_miners <- !quadrants.		
-   	
-+!quadrants
++!set_artifacts 
 	<- 	//Compute quadrants
-		qd::computeQuadrants[artifact_id(IdQdf)];
-		//Set Quadrants
-		qd::updatePropQuadrant(miner1)[artifact_id(IdQdf)];
-		qd::updatePropQuadrant(miner2)[artifact_id(IdQdf)];
-		qd::updatePropQuadrant(miner3)[artifact_id(IdQdf)];
-		qd::updatePropQuadrant(miner4)[artifact_id(IdQdf)];
-		//Set strategy in gold
-		gd::setQuadrantExclusive(false)[artifact_id(IgGM)];
-		.     
+	qd::computeQuadrants[artifact_id(IdQdf)];
+	//Set Quadrants
+	qd::updatePropQuadrant(miner1)[artifact_id(IdQdf)];
+	qd::updatePropQuadrant(miner2)[artifact_id(IdQdf)];
+	qd::updatePropQuadrant(miner3)[artifact_id(IdQdf)];
+	qd::updatePropQuadrant(miner4)[artifact_id(IdQdf)];
+	//Set strategy in gold
+	gd::setQuadrantExclusive(false)[artifact_id(IgGM)];
+	.     
 		
 		
 +!run_miner <- 	.broadcast(tell, free).
